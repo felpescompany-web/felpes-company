@@ -24,13 +24,16 @@ body { background:var(--black); color:var(--white); font-family:'Montserrat',san
 #cur-ring { position:fixed; width:36px; height:36px; border:1px solid rgba(192,192,192,.38); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .35s,height .35s,border-color .35s; }
 
 /* ── LOADING */
-#loading { position:fixed; inset:0; z-index:1000; transition:opacity 1s ease; }
+#loading { position:fixed; inset:0; background:#080808; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .8s ease; }
 #loading.hide { opacity:0; pointer-events:none; }
-#load-video { position:absolute; inset:0; width:100vw; height:100vh; object-fit:cover; display:block; }
-.load-name { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-family:'Cormorant Garamond',serif; font-size:24px; letter-spacing:.5em; color:rgba(255,255,255,.9); text-transform:uppercase; opacity:0; animation:fi .8s ease 1s forwards; white-space:nowrap; }
-.load-bar-wrap { position:absolute; bottom:0; left:0; right:0; height:1px; background:rgba(255,255,255,.1); }
-.load-bar { height:1px; background:#fff; width:0; }
-@keyframes fi { to{opacity:1} }
+#load-video { width:280px; height:auto; display:block; mix-blend-mode:lighten; transform:translateX(-50vw); animation:horseSlide 1.8s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+@keyframes horseSlide { to { transform:translateX(0); } }
+#load-logo { width:60px; height:60px; object-fit:contain; margin-top:24px; opacity:0; animation:fi .6s ease 2.3s forwards; }
+.load-name { font-family:'Cormorant Garamond',serif; font-size:20px; letter-spacing:.5em; color:#C0C0C0; text-transform:uppercase; margin-top:16px; opacity:0; animation:fi .6s ease 2.8s forwards; white-space:nowrap; }
+.load-bar-wrap { position:absolute; bottom:44px; left:8%; right:8%; height:1px; background:rgba(192,192,192,.1); }
+.load-bar { height:1px; background:var(--silver); width:0; animation:lb 3.5s linear forwards; box-shadow:0 0 4px rgba(192,192,192,.3); }
+@keyframes lb { to { width:100%; } }
+@keyframes fi { to { opacity:1; } }
 
 /* ── NAV — exactly like Lusion: minimal top bar */
 nav {
@@ -313,6 +316,7 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
 <!-- LOADING -->
 <div id="loading">
   <video id="load-video" src="kling-video-o-1_tire_esse_raio_de_lus_que_passa_no_final-0.mp4" autoplay muted playsinline></video>
+  <img id="load-logo" src="logo.png" alt="">
   <div class="load-name">Felpes Company</div>
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
 </div>
@@ -488,27 +492,11 @@ document.querySelectorAll('a,button,.card').forEach(el=>{
 });
 
 // ── LOADING
-(()=>{
-  const video = document.getElementById('load-video');
-  const bar = document.querySelector('.load-bar');
-  function startBar(duration){
-    bar.style.transition = `width ${duration}s linear`;
-    bar.style.width = '100%';
-  }
-  video.addEventListener('loadedmetadata', () => startBar(video.duration));
-  video.addEventListener('ended', () => {
-    const loading = document.getElementById('loading');
-    loading.classList.add('hide');
-    setTimeout(() => { loading.style.display = 'none'; initHero(); initFinale(); }, 1000);
-  });
-  // fallback se o vídeo não carregar
-  setTimeout(() => {
-    if (document.getElementById('loading').style.display !== 'none') {
-      document.getElementById('loading').classList.add('hide');
-      setTimeout(() => { document.getElementById('loading').style.display='none'; initHero(); initFinale(); }, 1000);
-    }
-  }, 8000);
-})();
+setTimeout(() => {
+  const loading = document.getElementById('loading');
+  loading.classList.add('hide');
+  setTimeout(() => { loading.style.display = 'none'; initHero(); initFinale(); }, 800);
+}, 4000);
 
 // ── HERO THREE.JS
 function initHero(){
