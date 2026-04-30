@@ -367,7 +367,12 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
   <div class="work-grid">
 
     <a class="card" href="#contact" style="transition-delay:.0s">
-      <div class="card-img"><div style="overflow:hidden;width:100%;height:100%;"><video class="card-video" src="MacBook_Pro_website_transformati…_202604301800.mp4" autoplay muted loop playsinline style="width:100%;height:120%;object-fit:cover;display:block;transform:translateY(0);will-change:transform;"></video></div><div class="card-overlay"></div><div class="card-pill">Solicitar →</div></div>
+      <div class="card-img" id="card-reveal-1">
+        <img src="_Dark_black_background,_open_MacBook_202604301747.jpeg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+        <img id="reveal-premium" src="_MacBook_Pro_on_dark_black_202604301746.jpeg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+        <canvas class="reveal-canvas" id="reveal-canvas-1" style="position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;"></canvas>
+        <div class="card-overlay"></div><div class="card-pill">Solicitar →</div>
+      </div>
       <div class="card-meta"><div class="card-tags">criação · visual · peças</div><div class="card-name">Design Gráfico</div></div>
     </a>
 
@@ -586,14 +591,41 @@ document.querySelectorAll('.card,.statement-text,.finale-content').forEach(el=>i
 function ic(id){const cv=document.getElementById(id);if(!cv)return null;function r(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;}r();new ResizeObserver(r).observe(cv);return{cv,ctx:cv.getContext('2d')};}
 function fill(ctx,cv,c='#080808'){ctx.fillStyle=c;ctx.fillRect(0,0,cv.width,cv.height);}
 
-// ── PARALLAX card videos
-window.addEventListener('scroll', function(){
-  document.querySelectorAll('.card-video').forEach(function(video){
-    var rect = video.closest('.card').getBoundingClientRect();
-    var center = rect.top + rect.height/2 - window.innerHeight/2;
-    video.style.transform = 'translateY(' + (center * 0.12) + 'px)';
+// ── REVEAL EFFECT card 1
+(function(){
+  const cardImg = document.getElementById('card-reveal-1');
+  const canvas = document.getElementById('reveal-canvas-1');
+  const premiumImg = document.getElementById('reveal-premium');
+  if(!cardImg || !canvas || !premiumImg) return;
+  const ctx = canvas.getContext('2d');
+  let mx = 0, my = 0, radius = 0, targetR = 0, raf = null;
+  function resize(){ canvas.width = cardImg.offsetWidth; canvas.height = cardImg.offsetHeight; }
+  resize(); new ResizeObserver(resize).observe(cardImg);
+  function draw(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    radius += (targetR - radius) * 0.1;
+    if(radius > 0.5){
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(mx, my, radius, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(premiumImg, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    }
+    if(Math.abs(targetR - radius) > 0.5) raf = requestAnimationFrame(draw);
+    else raf = null;
+  }
+  cardImg.addEventListener('mousemove', function(e){
+    const r = cardImg.getBoundingClientRect();
+    mx = e.clientX - r.left; my = e.clientY - r.top;
+    targetR = 150;
+    if(!raf) raf = requestAnimationFrame(draw);
   });
-}, {passive:true});
+  cardImg.addEventListener('mouseleave', function(){
+    targetR = 0;
+    if(!raf) raf = requestAnimationFrame(draw);
+  });
+})();
 
 // 02 Branding
 (()=>{const o=ic('c2');if(!o)return;const{cv,ctx}=o;let t=0;
