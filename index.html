@@ -601,6 +601,15 @@ function fill(ctx,cv,c='#080808'){ctx.fillStyle=c;ctx.fillRect(0,0,cv.width,cv.h
   let mx = 0, my = 0, radius = 0, targetR = 0, raf = null;
   function resize(){ canvas.width = cardImg.offsetWidth; canvas.height = cardImg.offsetHeight; }
   resize(); new ResizeObserver(resize).observe(cardImg);
+  function drawCover(img){
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const cw = canvas.width, ch = canvas.height;
+    const imgRatio = iw / ih, canvasRatio = cw / ch;
+    let sx, sy, sw, sh;
+    if(imgRatio > canvasRatio){ sh = ih; sw = sh * canvasRatio; sx = (iw - sw) / 2; sy = 0; }
+    else { sw = iw; sh = sw / canvasRatio; sx = 0; sy = (ih - sh) / 2; }
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+  }
   function draw(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     radius += (targetR - radius) * 0.1;
@@ -609,7 +618,7 @@ function fill(ctx,cv,c='#080808'){ctx.fillStyle=c;ctx.fillRect(0,0,cv.width,cv.h
       ctx.beginPath();
       ctx.arc(mx, my, radius, 0, Math.PI * 2);
       ctx.clip();
-      ctx.drawImage(premiumImg, 0, 0, canvas.width, canvas.height);
+      drawCover(premiumImg);
       ctx.restore();
     }
     if(Math.abs(targetR - radius) > 0.5) raf = requestAnimationFrame(draw);
