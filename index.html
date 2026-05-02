@@ -51,16 +51,17 @@ nav {
 
 /* ── HERO — full screen */
 #hero { height:100vh; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-#hero-canvas { position:absolute; inset:0; width:100%; height:100%; }
+#hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.hero-overlay-canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; }
 .hero-tagline {
-  position:absolute; bottom:80px; left:48px;
+  position:absolute; bottom:80px; left:48px; z-index:3;
   font-family:'Cormorant Garamond',serif;
   font-size:clamp(13px,1.2vw,16px);
   font-weight:300; letter-spacing:.08em;
   color:rgba(192,192,192,.5);
   font-style:italic;
 }
-.scroll-hint { position:absolute; bottom:44px; right:48px; display:flex; align-items:center; gap:10px; }
+.scroll-hint { position:absolute; bottom:44px; right:48px; display:flex; align-items:center; gap:10px; z-index:3; }
 .scroll-line { width:36px; height:1px; background:linear-gradient(to right,transparent,var(--silver)); animation:scrollPulse 2s ease infinite; }
 .scroll-txt { font-size:8px; letter-spacing:.3em; color:var(--dim); text-transform:uppercase; }
 @keyframes scrollPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
@@ -338,7 +339,8 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
 
 <!-- HERO -->
 <section id="hero">
-  <canvas id="hero-canvas"></canvas>
+  <video id="hero-video" src="video.mov" muted playsinline preload="auto"></video>
+  <canvas class="hero-overlay-canvas" id="hero-overlay"></canvas>
   <p class="hero-tagline">Todo império começa com uma identidade.</p>
   <div class="scroll-hint">
     <span class="scroll-txt">Scroll to explore</span>
@@ -513,7 +515,7 @@ document.querySelectorAll('a,button,.card').forEach(el=>{
     setTimeout(() => {
       const loading = document.getElementById('loading');
       loading.classList.add('hide');
-      setTimeout(() => { loading.style.display = 'none'; initHero(); initFinale(); }, 800);
+      setTimeout(() => { loading.style.display = 'none'; initFinale(); }, 800);
     }, 1000);
   });
 
@@ -521,42 +523,67 @@ document.querySelectorAll('a,button,.card').forEach(el=>{
   setTimeout(() => {
     if (document.getElementById('loading').style.display !== 'none') {
       document.getElementById('loading').classList.add('hide');
-      setTimeout(() => { document.getElementById('loading').style.display = 'none'; initHero(); initFinale(); }, 800);
+      setTimeout(() => { document.getElementById('loading').style.display = 'none'; initFinale(); }, 800);
     }
   }, 10000);
 })();
 
-// ── HERO THREE.JS
-function initHero(){
-  const canvas=document.getElementById('hero-canvas');
-  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(innerWidth,innerHeight);
-  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
-  camera.position.z=5;
-  const geo=new THREE.IcosahedronGeometry(1.6,1);
-  const mat=new THREE.MeshStandardMaterial({color:0xC0C0C0,metalness:1,roughness:.08});
-  const mesh=new THREE.Mesh(geo,mat); scene.add(mesh);
-  const s2=new THREE.Mesh(new THREE.SphereGeometry(.9,32,32),new THREE.MeshStandardMaterial({color:0x999999,metalness:1,roughness:.04}));
-  scene.add(s2);
-  scene.add(new THREE.AmbientLight(0xffffff,.25));
-  const pl=new THREE.PointLight(0xC0C0C0,3,20);pl.position.set(4,4,4);scene.add(pl);
-  scene.add(Object.assign(new THREE.PointLight(0x4466aa,2,20),{position:{x:-4,y:-2,z:2}}));
-  const stGeo=new THREE.BufferGeometry();
-  const arr=[];for(let i=0;i<900;i++)arr.push((Math.random()-.5)*40,(Math.random()-.5)*40,(Math.random()-.5)*40);
-  stGeo.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));
-  scene.add(new THREE.Points(stGeo,new THREE.PointsMaterial({color:0xC0C0C0,size:.012,transparent:true,opacity:.35})));
-  let mox=0,moy=0,t=0;
-  document.addEventListener('mousemove',e=>{mox=(e.clientX/innerWidth-.5)*2;moy=(e.clientY/innerHeight-.5)*2;});
-  window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
-  (function render(){requestAnimationFrame(render);t+=.005;
-    mesh.rotation.y+=(mox*.5-mesh.rotation.y)*.05;
-    mesh.rotation.x+=(-moy*.3-mesh.rotation.x)*.05;
-    mesh.rotation.z=Math.sin(t)*.08;
-    pl.position.x=Math.sin(t)*5;pl.position.z=Math.cos(t)*5;
-    renderer.render(scene,camera);
-  })();
-}
+// ── HERO VIDEO + CURSOR INTERACTION
+(function(){
+  const hero = document.getElementById('hero');
+  const video = document.getElementById('hero-video');
+  const overlay = document.getElementById('hero-overlay');
+  const ctx = overlay.getContext('2d');
+  let mx = 0, my = 0, pauseTimer = null, currentZone = -1;
+
+  function resize(){
+    overlay.width = hero.offsetWidth;
+    overlay.height = hero.offsetHeight;
+  }
+  resize();
+  new ResizeObserver(resize).observe(hero);
+
+  function getZone(x, y){
+    const col = Math.floor(x / (hero.offsetWidth / 3));
+    const row = Math.floor(y / (hero.offsetHeight / 3));
+    return row * 3 + col;
+  }
+
+  function drawFlashlight(){
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+    const grad = ctx.createRadialGradient(mx, my, 0, mx, my, 200);
+    grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, overlay.width, overlay.height);
+    requestAnimationFrame(drawFlashlight);
+  }
+  drawFlashlight();
+
+  hero.addEventListener('mousemove', e => {
+    const rect = hero.getBoundingClientRect();
+    mx = e.clientX - rect.left;
+    my = e.clientY - rect.top;
+
+    const zone = getZone(mx, my);
+    if(zone !== currentZone){
+      currentZone = zone;
+      video.currentTime = 0;
+      video.play();
+    }
+
+    clearTimeout(pauseTimer);
+    if(video.paused) video.play();
+    pauseTimer = setTimeout(() => video.pause(), 150);
+  });
+
+  hero.addEventListener('mouseleave', () => {
+    clearTimeout(pauseTimer);
+    video.pause();
+    video.currentTime = 0;
+    currentZone = -1;
+  });
+})()
 
 // ── FINALE THREE.JS
 function initFinale(){
