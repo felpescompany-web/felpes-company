@@ -24,15 +24,14 @@ body { background:var(--black); color:var(--white); font-family:'Montserrat',san
 #cur-ring { position:fixed; width:36px; height:36px; border:1px solid rgba(192,192,192,.38); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .35s,height .35s,border-color .35s; }
 
 /* ── LOADING */
-#loading { position:fixed; inset:0; background:var(--black); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .9s ease; }
+#loading { position:fixed; inset:0; background:#080808; z-index:1000; transition:opacity .8s ease; }
 #loading.hide { opacity:0; pointer-events:none; }
-#loading img { width:88px; height:88px; object-fit:contain; filter:drop-shadow(0 0 28px rgba(192,192,192,.45)); animation:floatL 1.6s ease-in-out infinite; }
-@keyframes floatL { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-.load-name { font-family:'Cormorant Garamond',serif; font-size:20px; letter-spacing:.55em; color:var(--silver); text-transform:uppercase; margin-top:32px; opacity:0; animation:fi .8s ease 1.1s forwards; }
-.load-bar-wrap { position:absolute; bottom:44px; left:8%; right:8%; height:1px; background:rgba(192,192,192,.08); }
-.load-bar { height:1px; background:var(--silver); width:0; animation:lb 2.6s ease forwards; box-shadow:0 0 6px rgba(192,192,192,.3); }
-@keyframes lb { to{width:100%} }
-@keyframes fi { to{opacity:1} }
+#load-video { position:absolute; top:50%; left:-150vw; width:280px; height:auto; mix-blend-mode:lighten; transform:translateY(-50%); animation:horseSlide 1.8s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+@keyframes horseSlide { to { left:50%; transform:translate(-50%,-50%); } }
+.load-name { position:absolute; top:calc(50% + 100px); left:50%; transform:translateX(-50%); font-family:'Cormorant Garamond',serif; font-size:20px; letter-spacing:.5em; color:#C0C0C0; text-transform:uppercase; white-space:nowrap; opacity:0; transition:opacity .6s ease; }
+.load-name.visible { opacity:1; }
+.load-bar-wrap { position:absolute; bottom:44px; left:8%; right:8%; height:1px; background:rgba(192,192,192,.1); }
+.load-bar { height:1px; background:var(--silver); width:0; box-shadow:0 0 4px rgba(192,192,192,.3); transition:width linear; }
 
 /* ── NAV — exactly like Lusion: minimal top bar */
 nav {
@@ -52,7 +51,6 @@ nav {
 
 /* ── HERO — full screen */
 #hero { height:100vh; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-#hero-canvas { position:absolute; inset:0; width:100%; height:100%; }
 .hero-tagline {
   position:absolute; bottom:80px; left:48px;
   font-family:'Cormorant Garamond',serif;
@@ -317,7 +315,7 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
 
 <!-- LOADING -->
 <div id="loading">
-  <img src="logo.png" alt="Felpes Company">
+  <video id="load-video" src="kling-video-o-1_tire_esse_raio_de_lus_que_passa_no_final-0.mp4" autoplay muted playsinline></video>
   <div class="load-name">Felpes Company</div>
   <div class="load-bar-wrap"><div class="load-bar"></div></div>
 </div>
@@ -340,9 +338,8 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
 
 <!-- HERO -->
 <section id="hero">
-  <video id="hero-video" src="video.mov" muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;"></video>
-  <canvas id="hero-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
-  <canvas id="hero-spotlight" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+  <video id="hero-video" src="video.mov" autoplay loop muted playsinline preload="auto" style="opacity:0;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
+  <canvas id="hero-overlay" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
   <p class="hero-tagline">Todo império começa com uma identidade.</p>
   <div class="scroll-hint">
     <span class="scroll-txt">Scroll to explore</span>
@@ -495,43 +492,32 @@ document.querySelectorAll('a,button,.card').forEach(el=>{
 });
 
 // ── LOADING
-setTimeout(()=>{
-  document.getElementById('loading').classList.add('hide');
-  setTimeout(()=>document.getElementById('loading').style.display='none',900);
-  initHero(); initFinale();
-},3000);
+(()=>{
+  const loadVid = document.getElementById('load-video');
+  const bar = document.querySelector('.load-bar');
+  const name = document.querySelector('.load-name');
+  loadVid.addEventListener('loadedmetadata', () => {
+    bar.style.transitionDuration = loadVid.duration + 's';
+    bar.style.width = '100%';
+  });
+  let textShown = false;
+  loadVid.addEventListener('timeupdate', () => {
+    if(!textShown && loadVid.currentTime >= 1.2){ textShown=true; name.classList.add('visible'); }
+  });
+  loadVid.addEventListener('ended', () => {
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hide');
+      setTimeout(() => { document.getElementById('loading').style.display='none'; initFinale(); }, 800);
+    }, 1000);
+  });
+  setTimeout(() => {
+    if(document.getElementById('loading').style.display !== 'none'){
+      document.getElementById('loading').classList.add('hide');
+      setTimeout(() => { document.getElementById('loading').style.display='none'; initFinale(); }, 800);
+    }
+  }, 10000);
+})();
 
-// ── HERO THREE.JS
-function initHero(){
-  const canvas=document.getElementById('hero-canvas');
-  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(innerWidth,innerHeight);
-  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
-  camera.position.z=5;
-  const geo=new THREE.IcosahedronGeometry(1.6,1);
-  const mat=new THREE.MeshStandardMaterial({color:0xC0C0C0,metalness:1,roughness:.08});
-  const mesh=new THREE.Mesh(geo,mat); scene.add(mesh);
-  const s2=new THREE.Mesh(new THREE.SphereGeometry(.9,32,32),new THREE.MeshStandardMaterial({color:0x999999,metalness:1,roughness:.04}));
-  scene.add(s2);
-  scene.add(new THREE.AmbientLight(0xffffff,.25));
-  const pl=new THREE.PointLight(0xC0C0C0,3,20);pl.position.set(4,4,4);scene.add(pl);
-  scene.add(Object.assign(new THREE.PointLight(0x4466aa,2,20),{position:{x:-4,y:-2,z:2}}));
-  const stGeo=new THREE.BufferGeometry();
-  const arr=[];for(let i=0;i<900;i++)arr.push((Math.random()-.5)*40,(Math.random()-.5)*40,(Math.random()-.5)*40);
-  stGeo.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));
-  scene.add(new THREE.Points(stGeo,new THREE.PointsMaterial({color:0xC0C0C0,size:.012,transparent:true,opacity:.35})));
-  let mox=0,moy=0,t=0;
-  document.addEventListener('mousemove',e=>{mox=(e.clientX/innerWidth-.5)*2;moy=(e.clientY/innerHeight-.5)*2;});
-  window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
-  (function render(){requestAnimationFrame(render);t+=.005;
-    mesh.rotation.y+=(mox*.5-mesh.rotation.y)*.05;
-    mesh.rotation.x+=(-moy*.3-mesh.rotation.x)*.05;
-    mesh.rotation.z=Math.sin(t)*.08;
-    pl.position.x=Math.sin(t)*5;pl.position.z=Math.cos(t)*5;
-    renderer.render(scene,camera);
-  })();
-}
 
 // ── FINALE THREE.JS
 function initFinale(){
@@ -749,89 +735,99 @@ if(iF&&pos===0){ctx.fillStyle='rgba(192,192,192,.65)';ctx.font=`${cv.width*.026}
   window.addEventListener('scroll', parallax, {passive:true});
   parallax();
 })();
-// ── HERO VIDEO SPOTLIGHT
+// ── HERO VIDEO LANTERNA
 (function(){
-  const hero=document.getElementById('hero');
-  const video=document.getElementById('hero-video');
-  const sc=document.getElementById('hero-spotlight');
-  if(!sc||!video)return;
-  const sCtx=sc.getContext('2d');
-  let mx=-999,my=-999,inside=false,rafId=null,lastX=-999,lastY=-999;
+  const hero  = document.getElementById('hero');
+  const video = document.getElementById('hero-video');
+  const ov    = document.getElementById('hero-overlay');
+  const ctx   = ov.getContext('2d');
+  const R = 120;
 
-  function resize(){ sc.width=hero.offsetWidth; sc.height=hero.offsetHeight; }
-  resize(); new ResizeObserver(resize).observe(hero);
+  let mx = -999, my = -999, onHero = false;
+  let frame0 = null;
 
-  function drawFrame(ctx,w,h){
-    if(video.readyState<2)return;
-    const vr=video.videoWidth/video.videoHeight, cr=w/h;
-    let dw,dh,dx,dy;
-    if(vr>cr){dh=h;dw=dh*vr;dx=(w-dw)/2;dy=0;}
-    else{dw=w;dh=dw/vr;dx=0;dy=(h-dh)/2;}
-    ctx.drawImage(video,dx,dy,dw,dh);
+  function coverParams(w, h){
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if(!vw || !vh) return null;
+    const vr = vw/vh, cr = w/h;
+    let sx,sy,sw,sh;
+    if(vr > cr){ sh=vh; sw=sh*cr; sx=(vw-sw)/2; sy=0; }
+    else       { sw=vw; sh=sw/cr; sx=0; sy=(vh-sh)/2; }
+    return {sx,sy,sw,sh};
   }
 
-  function drawBase(){
-    sCtx.clearRect(0,0,sc.width,sc.height);
-    drawFrame(sCtx,sc.width,sc.height);
+  function drawCover(c, w, h){
+    const p = coverParams(w, h);
+    if(!p) return;
+    c.drawImage(video, p.sx, p.sy, p.sw, p.sh, 0, 0, w, h);
   }
 
-  // Carrega primeiro frame como base
-  video.addEventListener('loadeddata',()=>{ video.currentTime=0; });
-  video.addEventListener('seeked',()=>{ if(!inside) drawBase(); });
-  video.load();
+  function captureFrame0(){
+    if(video.readyState < 2) return;
+    const oc = document.createElement('canvas');
+    oc.width = ov.width; oc.height = ov.height;
+    drawCover(oc.getContext('2d'), oc.width, oc.height);
+    frame0 = oc;
+  }
+
+  function resize(){
+    ov.width  = hero.offsetWidth;
+    ov.height = hero.offsetHeight;
+    captureFrame0();
+  }
+  resize();
+  new ResizeObserver(resize).observe(hero);
+
+  video.addEventListener('canplay', () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+  video.addEventListener('seeked', () => { if(!onHero) captureFrame0(); });
 
   function draw(){
-    sCtx.clearRect(0,0,sc.width,sc.height);
-    // Base — primeiro frame estático
-    video.pause();
-    video.currentTime=0;
-    drawFrame(sCtx,sc.width,sc.height);
+    const w = ov.width, h = ov.height;
+    ctx.clearRect(0, 0, w, h);
 
-    if(!inside||mx<0){ rafId=null; return; }
+    if(frame0){
+      ctx.drawImage(frame0, 0, 0, w, h);
 
-    // Toca vídeo só para ter frames
-    if(video.paused) video.play().catch(()=>{});
+      if(onHero && mx >= 0){
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(mx, my, R, 0, Math.PI*2);
+        ctx.clip();
+        drawCover(ctx, w, h);
+        ctx.restore();
 
-    const r=58;
-    // Dentro do círculo — vídeo rodando
-    sCtx.save();
-    sCtx.beginPath();sCtx.arc(mx,my,r,0,Math.PI*2);sCtx.clip();
-    drawFrame(sCtx,sc.width,sc.height);
-    sCtx.restore();
-
-    // Borda glow
-    const g=sCtx.createRadialGradient(mx,my,r*.7,mx,my,r);
-    g.addColorStop(0,'rgba(192,192,192,0)');
-    g.addColorStop(1,'rgba(192,192,192,0.25)');
-    sCtx.beginPath();sCtx.arc(mx,my,r,0,Math.PI*2);
-    sCtx.fillStyle=g;sCtx.fill();
-
-    rafId=requestAnimationFrame(draw);
-  }
-
-  hero.addEventListener('mouseenter',()=>{
-    inside=true;
-    video.play().catch(()=>{});
-    if(!rafId) rafId=requestAnimationFrame(draw);
-  });
-
-  hero.addEventListener('mousemove',e=>{
-    const rect=hero.getBoundingClientRect();
-    const nx=e.clientX-rect.left, ny=e.clientY-rect.top;
-    const dist=Math.sqrt((nx-lastX)**2+(ny-lastY)**2);
-    if(dist>58){
-      video.currentTime=0;
-      video.play().catch(()=>{});
-      lastX=nx; lastY=ny;
+        // borda suave
+        const ring = ctx.createRadialGradient(mx, my, R-8, mx, my, R+6);
+        ring.addColorStop(0, 'rgba(192,192,192,0)');
+        ring.addColorStop(1, 'rgba(192,192,192,0.3)');
+        ctx.beginPath();
+        ctx.arc(mx, my, R+6, 0, Math.PI*2);
+        ctx.fillStyle = ring;
+        ctx.fill();
+      }
     }
-    mx=nx; my=ny;
-  });
 
-  hero.addEventListener('mouseleave',()=>{
-    inside=false; mx=-999; my=-999; lastX=-999; lastY=-999;
-    video.pause(); video.currentTime=0;
-    cancelAnimationFrame(rafId); rafId=null;
-    setTimeout(drawBase, 50);
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  hero.addEventListener('mouseenter', () => {
+    onHero = true;
+    video.play().catch(()=>{});
+  });
+  hero.addEventListener('mousemove', e => {
+    const r = hero.getBoundingClientRect();
+    mx = e.clientX - r.left;
+    my = e.clientY - r.top;
+  });
+  hero.addEventListener('mouseleave', () => {
+    onHero = false;
+    mx = -999; my = -999;
+    video.pause();
+    video.currentTime = 0;
   });
 })();
 
