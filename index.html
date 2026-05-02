@@ -835,6 +835,26 @@ document.getElementById('btnEmpire').addEventListener('click',e=>{
     else{wh.classList.remove('active');document.getElementById('contact').scrollIntoView({behavior:'smooth'});}
   })();
 });
+(function(){
+const hero=document.getElementById('hero');
+const video=document.getElementById('hero-video');
+const sc=document.getElementById('hero-spotlight');
+if(!sc||!video)return;
+const sCtx=sc.getContext('2d');
+let mx=-999,my=-999,inside=false,rafId=null,lastX=-999,lastY=-999,firstFrame=null;
+function resize(){sc.width=hero.offsetWidth;sc.height=hero.offsetHeight;}
+resize();new ResizeObserver(resize).observe(hero);
+function drawFrame(ctx,w,h){if(video.readyState<2)return;const vr=video.videoWidth/video.videoHeight,cr=w/h;let dw,dh,dx,dy;if(vr>cr){dh=h;dw=dh*vr;dx=(w-dw)/2;dy=0;}else{dw=w;dh=dw/vr;dx=0;dy=(h-dh)/2;}ctx.drawImage(video,dx,dy,dw,dh);}
+function captureFirst(){const off=document.createElement('canvas');off.width=sc.width;off.height=sc.height;drawFrame(off.getContext('2d'),off.width,off.height);firstFrame=off;}
+function drawBase(){sCtx.clearRect(0,0,sc.width,sc.height);if(firstFrame)sCtx.drawImage(firstFrame,0,0,sc.width,sc.height);else drawFrame(sCtx,sc.width,sc.height);}
+video.addEventListener('loadeddata',()=>{video.currentTime=0;});
+video.addEventListener('seeked',()=>{if(!firstFrame)captureFirst();if(!inside)drawBase();});
+video.load();
+function draw(){sCtx.clearRect(0,0,sc.width,sc.height);if(firstFrame)sCtx.drawImage(firstFrame,0,0,sc.width,sc.height);else drawFrame(sCtx,sc.width,sc.height);if(!inside||mx<0){rafId=null;return;}const r=35;sCtx.save();sCtx.beginPath();sCtx.arc(mx,my,r,0,Math.PI*2);sCtx.clip();drawFrame(sCtx,sc.width,sc.height);sCtx.restore();const g=sCtx.createRadialGradient(mx,my,r*.7,mx,my,r);g.addColorStop(0,'rgba(192,192,192,0)');g.addColorStop(1,'rgba(192,192,192,0.25)');sCtx.beginPath();sCtx.arc(mx,my,r,0,Math.PI*2);sCtx.fillStyle=g;sCtx.fill();rafId=requestAnimationFrame(draw);}
+hero.addEventListener('mouseenter',()=>{inside=true;video.play().catch(()=>{});if(!rafId)rafId=requestAnimationFrame(draw);});
+hero.addEventListener('mousemove',e=>{const rect=hero.getBoundingClientRect();const nx=e.clientX-rect.left,ny=e.clientY-rect.top;const dist=Math.sqrt((nx-lastX)**2+(ny-lastY)**2);if(dist>35){video.currentTime=0;video.play().catch(()=>{});lastX=nx;lastY=ny;}mx=nx;my=ny;});
+hero.addEventListener('mouseleave',()=>{inside=false;mx=-999;my=-999;lastX=-999;lastY=-999;video.pause();video.currentTime=0;cancelAnimationFrame(rafId);rafId=null;setTimeout(drawBase,50);});
+})();
 </script>
 </body>
 </html>
