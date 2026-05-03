@@ -6,6 +6,7 @@
     { "src": "*.png", "use": "@vercel/static" },
     { "src": "*.jpeg", "use": "@vercel/static" },
     { "src": "*.jpg", "use": "@vercel/static" },
-    { "src": "*.mov", "use": "@vercel/static" }
+    { "src": "*.mov", "use": "@vercel/static" },
+    { "src": "*.glb", "use": "@vercel/static" }
   ]
 }
