@@ -17,15 +17,6 @@ body { background:var(--black); color:var(--white); font-family:'Montserrat',san
 #cur { position:fixed; width:7px; height:7px; background:var(--silver); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); }
 #cur-ring { position:fixed; width:36px; height:36px; border:1px solid rgba(192,192,192,.38); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .35s,height .35s,border-color .35s; }
 
-/* ── HORSE LOADER */
-#horse-loader { position:fixed; inset:0; background:#080808; z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity 0.8s ease; }
-#horse-loader.hide { opacity:0; pointer-events:none; }
-#horse-loader img { width:64px; height:64px; object-fit:contain; filter:drop-shadow(0 0 20px rgba(192,192,192,.3)); animation:floatLogo 2s ease-in-out infinite; }
-@keyframes floatLogo { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-.loader-text { font-size:10px; letter-spacing:0.4em; color:#444; text-transform:uppercase; margin-top:24px; font-family:'Montserrat',sans-serif; }
-.loader-bar-wrap { width:200px; height:1px; background:#111; margin-top:32px; }
-#horse-progress { height:1px; background:#C0C0C0; width:0; transition:width 0.3s ease; }
-
 /* ── NAV */
 nav { position:fixed; top:0; left:0; right:0; z-index:200; display:flex; justify-content:space-between; align-items:center; padding:28px 48px; }
 .nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; cursor:none; }
@@ -45,30 +36,9 @@ nav { position:fixed; top:0; left:0; right:0; z-index:200; display:flex; justify
 .scroll-txt { font-size:8px; letter-spacing:.3em; color:var(--dim); text-transform:uppercase; }
 @keyframes scrollPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
 
-/* ── HORSE EXPERIENCE */
-#horse-experience { height:900vh; position:relative; }
-#horse-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
-
-/* ── SERVICE PANELS */
-.service-panel {
-  position:fixed; z-index:10; width:36vw; top:50%;
-  transform:translateY(-50%) translateX(-120vw);
-  opacity:0; visibility:hidden;
-  background:rgba(8,8,8,0.90); border:1px solid rgba(192,192,192,0.1);
-  border-radius:20px; padding:40px; backdrop-filter:blur(20px);
-  transition:transform 0.75s cubic-bezier(.16,1,.3,1), opacity 0.6s ease;
-}
-.service-panel.sp-right { transform:translateY(-50%) translateX(120vw); }
-.sp-num { font-family:'Cormorant Garamond',serif; font-size:80px; font-weight:300; color:rgba(192,192,192,0.04); position:absolute; top:12px; right:20px; line-height:1; pointer-events:none; user-select:none; }
-.sp-tags { font-size:9px; letter-spacing:0.2em; color:#444; text-transform:uppercase; }
-.sp-name { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; color:#E8E8E8; margin-top:8px; line-height:1.1; }
-.sp-line { height:1px; background:rgba(192,192,192,0.1); margin:16px 0; }
-.sp-desc { font-family:'Montserrat',sans-serif; font-size:12px; color:#666; line-height:1.9; max-width:300px; }
-.sp-btn { display:inline-block; margin-top:24px; padding:10px 28px; border:1px solid rgba(192,192,192,0.25); border-radius:999px; font-size:9px; letter-spacing:0.25em; color:#C0C0C0; text-decoration:none; cursor:none; transition:background 0.3s, color 0.3s; }
-.sp-btn:hover { background:#C0C0C0; color:#080808; }
-
-/* ── SECTIONS AFTER EXPERIENCE (cover the fixed canvas) */
-#statement, #finale, #contact, footer { position:relative; z-index:2; background:var(--black); }
+/* ── HORSE SCENE */
+#horse-scene { position:relative; height:100vh; overflow:hidden; background:var(--black); }
+#horse-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
 
 /* ── STATEMENT */
 #statement { padding:140px 48px; border-top:1px solid var(--border); max-width:1100px; margin:0 auto; }
@@ -81,7 +51,7 @@ nav { position:fixed; top:0; left:0; right:0; z-index:200; display:flex; justify
 .statement-cta a:hover { border-color:var(--silver); }
 
 /* ── FINALE */
-#finale { min-height:90vh; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 48px; border-top:1px solid var(--border); }
+#finale { min-height:90vh; overflow:hidden; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:120px 48px; border-top:1px solid var(--border); }
 #finale-canvas { position:absolute; inset:0; width:100%; height:100%; }
 .finale-content { position:relative; z-index:2; opacity:0; transform:translateY(32px); transition:opacity 1.2s,transform 1.2s; }
 .finale-content.visible { opacity:1; transform:translateY(0); }
@@ -139,20 +109,10 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
   #finale { padding:100px 24px; }
   footer { grid-template-columns:1fr; gap:16px; padding:36px 24px; text-align:center; }
   .footer-right { justify-content:center; }
-  #horse-experience { height:1400vh; }
-  .service-panel { width:88vw; left:6vw !important; right:auto !important; top:auto !important; bottom:5vh !important; transform:translateY(0) translateX(-120vw) !important; }
-  .service-panel.sp-right { transform:translateY(0) translateX(120vw) !important; }
 }
 </style>
 </head>
 <body>
-
-<!-- HORSE LOADER -->
-<div id="horse-loader">
-  <img src="logo.png" alt="Felpes Company">
-  <div class="loader-text">Carregando experiência...</div>
-  <div class="loader-bar-wrap"><div id="horse-progress"></div></div>
-</div>
 
 <div id="cur"></div>
 <div id="cur-ring"></div>
@@ -167,7 +127,7 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
     <span>Felpes Company</span>
   </a>
   <div class="nav-right">
-    <a href="#horse-experience" class="nav-link">Serviços</a>
+    <a href="#horse-scene" class="nav-link">Serviços</a>
     <a href="#contact" class="nav-link">Contato</a>
     <a href="#contact" class="nav-btn">Fale conosco</a>
   </div>
@@ -184,90 +144,10 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
   </div>
 </section>
 
-<!-- HORSE EXPERIENCE -->
-<div id="horse-experience">
+<!-- HORSE SCENE -->
+<section id="horse-scene">
   <canvas id="horse-canvas"></canvas>
-
-  <!-- Panel 01 — left (odd) -->
-  <div class="service-panel" data-index="0" style="left:5vw">
-    <span class="sp-num">01</span>
-    <div class="sp-tags">criação · visual · peças</div>
-    <div class="sp-name">Design Gráfico</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Identidade visual que comunica poder antes de qualquer palavra. Logotipos, materiais, peças que dominam.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 02 — right (even) -->
-  <div class="service-panel sp-right" data-index="1" style="right:5vw">
-    <span class="sp-num">02</span>
-    <div class="sp-tags">identidade · logo · manual</div>
-    <div class="sp-name">Branding & Identidade Visual</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Construímos a alma da sua marca. Do conceito ao manual completo — consistência que gera reconhecimento.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 03 — left -->
-  <div class="service-panel" data-index="2" style="left:5vw">
-    <span class="sp-num">03</span>
-    <div class="sp-tags">web · experiência · conversão</div>
-    <div class="sp-name">Criação de Sites</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Sites que vendem enquanto você dorme. Performance, design e estratégia em cada pixel.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 04 — right -->
-  <div class="service-panel sp-right" data-index="3" style="right:5vw">
-    <span class="sp-num">04</span>
-    <div class="sp-tags">crescimento · redes · estratégia</div>
-    <div class="sp-name">Marketing Digital</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Presença digital que domina mercados. Conteúdo, campanhas e estratégia para escalar seu negócio.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 05 — left -->
-  <div class="service-panel" data-index="4" style="left:5vw">
-    <span class="sp-num">05</span>
-    <div class="sp-tags">3d · render · projeto</div>
-    <div class="sp-name">Projetos Arquitetônicos</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Renders 3D fotorrealistas que fazem clientes assinarem antes de construir.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 06 — right -->
-  <div class="service-panel sp-right" data-index="5" style="right:5vw">
-    <span class="sp-num">06</span>
-    <div class="sp-tags">produto · embalagem · premium</div>
-    <div class="sp-name">Embalagem & Packaging</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Embalagens que vendem na prateleira. Design premium que justifica o preço e encanta quem compra.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 07 — left -->
-  <div class="service-panel" data-index="6" style="left:5vw">
-    <span class="sp-num">07</span>
-    <div class="sp-tags">apresentação · pitch · investidores</div>
-    <div class="sp-name">Pitch Deck & Apresentações</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Decks que captam investimento. Narrativa visual que transforma ideias em negócios financiados.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-
-  <!-- Panel 08 — right -->
-  <div class="service-panel sp-right" data-index="7" style="right:5vw">
-    <span class="sp-num">08</span>
-    <div class="sp-tags">seo · tráfego · orgânico</div>
-    <div class="sp-name">SEO & Tráfego Pago</div>
-    <div class="sp-line"></div>
-    <div class="sp-desc">Apareça primeiro quando mais importa. Estratégia orgânica e paga que traz clientes prontos para comprar.</div>
-    <a href="#contact" class="sp-btn">Solicitar →</a>
-  </div>
-</div>
+</section>
 
 <!-- STATEMENT -->
 <section id="statement">
@@ -336,7 +216,6 @@ body::after { content:''; position:fixed; inset:-200%; background-image:url("dat
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 <script>
 // ── CURSOR
 const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
@@ -370,7 +249,7 @@ document.querySelectorAll('a,button').forEach(el=>{
   hero.addEventListener('mouseleave',()=>{onHero=false;mx=-999;my=-999;lastX=-999;lastY=-999;video.pause();video.currentTime=0;});
 })();
 
-// ── SCROLL REVEAL (statement & finale)
+// ── SCROLL REVEAL
 const revealIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1});
 document.querySelectorAll('.statement-text,.finale-content').forEach(el=>revealIO.observe(el));
 
@@ -408,324 +287,62 @@ document.getElementById('btnEmpire').addEventListener('click',e=>{
   else{wh.classList.remove('active');document.getElementById('contact').scrollIntoView({behavior:'smooth'});}})();
 });
 
-// ── LENIS
-const lenis=new Lenis({lerp:0.08,duration:1.4,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t))});
-
-// ── THREE.JS SCENE SETUP
-const horseExp=document.getElementById('horse-experience');
-const horseCanvas=document.getElementById('horse-canvas');
-const isMobile=innerWidth<=768;
-
-const renderer=new THREE.WebGLRenderer({canvas:horseCanvas,antialias:true,alpha:true});
-renderer.setPixelRatio(isMobile?1:Math.min(devicePixelRatio,1.5));
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.2;
-
-const scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x080808,0.15);
-
-const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,100);
-
-// Lights
-scene.add(new THREE.AmbientLight(0xffffff,0.15));
-const mainLight=new THREE.PointLight(0xC0C0C0,6,30);
-mainLight.castShadow=true;
-mainLight.position.set(4,4,6);
-scene.add(mainLight);
-const fillLight=new THREE.PointLight(0x334466,2,20);
-fillLight.position.set(-5,-2,2);
-scene.add(fillLight);
-const rimLight=new THREE.PointLight(0xC0C0C0,3,20);
-rimLight.position.set(0,6,-4);
-scene.add(rimLight);
-
-// Camera keyframes (9 positions)
-const mz=isMobile?1.4:1;
-const CKF=[
-  {pos:[0,0.5,3],      target:[0,0.5,0],  fog:0.15},
-  {pos:[5,2.5,5*mz],   target:[0,1.5,0], fog:0.08},
-  {pos:[-5,2,5*mz],    target:[0,1.2,0], fog:0.06},
-  {pos:[0,5,3*mz],     target:[0,1,0],   fog:0.05},
-  {pos:[6,0.5,2*mz],   target:[0,0.5,0], fog:0.06},
-  {pos:[-4,1,6*mz],    target:[0,1,0],   fog:0.07},
-  {pos:[2,3,7*mz],     target:[0,1.5,0], fog:0.08},
-  {pos:[-2,2,8*mz],    target:[0,1,0],   fog:0.09},
-  {pos:[0,2,12*mz],    target:[0,0.5,0], fog:0.18}
-];
-
-// Init camera at first keyframe
-const camPos=new THREE.Vector3(...CKF[0].pos);
-const camTarget=new THREE.Vector3(...CKF[0].target);
-camera.position.copy(camPos);
-camera.lookAt(camTarget);
-
-// Horse model state
-let horse=null;
-const horseMeshes=[];
-let horseBaseRot=0;
-let scrollProgress=0;
-
-// Moss instances
-const mossCount=2000;
-const mossMat=new THREE.MeshStandardMaterial({color:0x1e3d0a,roughness:0.92,metalness:0.0});
-const mossMesh=new THREE.InstancedMesh(new THREE.SphereGeometry(0.022,7,7),mossMat,mossCount);
-mossMesh.frustumCulled=false;
-scene.add(mossMesh);
-const mossPos=[];
-const mossScales=new Float32Array(mossCount);
-for(let i=0;i<mossCount;i++){
-  const angle=Math.random()*Math.PI*2;
-  const radius=0.1+Math.random()*1.0;
-  mossPos.push({x:Math.cos(angle)*radius,y:-1.5+Math.random()*0.6,z:Math.sin(angle)*radius});
-  mossScales[i]=0;
-}
-
-// Flower instances
-const flowerCount=200;
-const flowerMat=new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:0.8,metalness:0.0});
-const flowerMesh=new THREE.InstancedMesh(new THREE.SphereGeometry(0.016,6,6),flowerMat,flowerCount);
-flowerMesh.frustumCulled=false;
-scene.add(flowerMesh);
-const flowerPos=[];
-const flowerScales=new Float32Array(flowerCount);
-for(let i=0;i<flowerCount;i++){
-  const angle=Math.random()*Math.PI*2;
-  const radius=0.2+Math.random()*1.1;
-  flowerPos.push({x:Math.cos(angle)*radius,y:-1.5+Math.random()*0.3,z:Math.sin(angle)*radius});
-  flowerScales[i]=0;
-}
-
-// Spores (Points)
-const sporeCount=150;
-const sporeGeo=new THREE.BufferGeometry();
-const sporePosArr=new Float32Array(sporeCount*3);
-for(let i=0;i<sporeCount;i++){
-  sporePosArr[i*3]=(Math.random()-0.5)*2;
-  sporePosArr[i*3+1]=-1.5+Math.random()*5;
-  sporePosArr[i*3+2]=(Math.random()-0.5)*2;
-}
-sporeGeo.setAttribute('position',new THREE.BufferAttribute(sporePosArr,3));
-const sporeMesh=new THREE.Points(sporeGeo,new THREE.PointsMaterial({size:0.018,color:0xffffff,opacity:0.5,transparent:true,sizeAttenuation:true}));
-scene.add(sporeMesh);
-
-// Panel state tracking
-const panels=document.querySelectorAll('.service-panel');
-const panelStates=new Array(8).fill('init');
-
-function updatePanels(prog){
-  panels.forEach((panel,i)=>{
-    const entryStart=(i+0.5)/9;
-    const entryEnd=(i+1)/9;
-    const exitEnd=(i+1.4)/9;
-    const isLeft=i%2===0;
-    const offDir=isLeft?'translateX(-120vw)':'translateX(120vw)';
-
-    let newState;
-    if(prog>=entryStart&&prog<entryEnd) newState='visible';
-    else if(prog>=entryEnd&&prog<exitEnd) newState='exiting';
-    else newState='hidden';
-
-    if(newState!==panelStates[i]){
-      panelStates[i]=newState;
-      if(newState==='visible'){
-        panel.style.visibility='visible';
-        panel.style.transform='translateY(-50%) translateX(0)';
-        panel.style.opacity='1';
-      } else if(newState==='exiting'){
-        panel.style.transform=`translateY(-50%) ${offDir}`;
-        panel.style.opacity='0';
-        setTimeout(()=>{if(panelStates[i]==='exiting')panel.style.visibility='hidden';},800);
-      } else {
-        panel.style.transform=`translateY(-50%) ${offDir}`;
-        panel.style.opacity='0';
-        panel.style.visibility='hidden';
-      }
-    }
-  });
-}
-
-// Colors for horse
-const colorStart=new THREE.Color(0x1a1a1a);
-const colorMid=new THREE.Color(0x888888);
-const colorEnd=new THREE.Color(0xC0C0C0);
-
-// Dummy for instanced mesh
-const dummy=new THREE.Object3D();
-
-// Animate loop
-function animate(time){
-  requestAnimationFrame(animate);
-  lenis.raf(time);
-
-  // Scroll progress relative to horse experience
-  const expTop=horseExp.offsetTop;
-  const expHeight=horseExp.offsetHeight;
-  const rawProg=(lenis.scroll-expTop)/(expHeight-window.innerHeight);
-  scrollProgress=Math.max(0,Math.min(1,rawProg));
-
-  if(!horse){renderer.render(scene,camera);return;}
-
-  // Camera interpolation
-  const kfIdx=scrollProgress*8;
-  const kfFloor=Math.floor(Math.min(kfIdx,7));
-  const alpha=kfIdx-kfFloor;
-  const kf1=CKF[kfFloor],kf2=CKF[Math.min(kfFloor+1,8)];
-  const tPos=new THREE.Vector3(...kf1.pos).lerp(new THREE.Vector3(...kf2.pos),alpha);
-  const tTgt=new THREE.Vector3(...kf1.target).lerp(new THREE.Vector3(...kf2.target),alpha);
-  camPos.lerp(tPos,0.04);
-  camTarget.lerp(tTgt,0.04);
-  camera.position.copy(camPos);
-  camera.lookAt(camTarget);
-
-  // Fog
-  const tFog=kf1.fog+(kf2.fog-kf1.fog)*alpha;
-  scene.fog.density+=(tFog-scene.fog.density)*0.02;
-
-  // Horse rotation
-  horseBaseRot+=0.003;
-  horse.rotation.y=horseBaseRot+scrollProgress*Math.PI*1.5;
-  horse.rotation.z=Math.sin(Date.now()*0.0008)*0.015;
-
-  // Horse color
-  let tColor;
-  if(scrollProgress<0.5){
-    tColor=colorStart.clone().lerp(colorMid,scrollProgress*2);
-  }else{
-    tColor=colorMid.clone().lerp(colorEnd,(scrollProgress-0.5)*2);
-  }
-  horseMeshes.forEach(m=>{
-    m.material.color.lerp(tColor,0.03);
-    const tMetal=0.4+scrollProgress*0.55;
-    m.material.metalness+=(tMetal-m.material.metalness)*0.05;
-  });
-
-  // Main light orbit
-  mainLight.position.x=Math.sin(scrollProgress*Math.PI*2)*6;
-  mainLight.position.z=Math.cos(scrollProgress*Math.PI*2)*6;
-  mainLight.position.y=3+Math.sin(scrollProgress*Math.PI)*3;
-  const tIntensity=4+scrollProgress*4;
-  mainLight.intensity+=(tIntensity-mainLight.intensity)*0.05;
-
-  // Moss
-  const mossTarget=Math.floor(scrollProgress*2.2*mossCount);
-  for(let i=0;i<mossCount;i++){
-    const ts=i<mossTarget?1:0;
-    mossScales[i]+=(ts-mossScales[i])*0.06;
-    dummy.position.set(mossPos[i].x,mossPos[i].y,mossPos[i].z);
-    dummy.scale.setScalar(Math.max(0,mossScales[i]));
-    dummy.updateMatrix();
-    mossMesh.setMatrixAt(i,dummy.matrix);
-  }
-  mossMesh.instanceMatrix.needsUpdate=true;
-
-  // Flowers
-  const flowerTarget=scrollProgress>0.25?Math.floor((scrollProgress-0.25)*3*flowerCount):0;
-  for(let i=0;i<flowerCount;i++){
-    const ts=i<flowerTarget?1:0;
-    flowerScales[i]+=(ts-flowerScales[i])*0.06;
-    dummy.position.set(flowerPos[i].x,flowerPos[i].y,flowerPos[i].z);
-    dummy.scale.setScalar(Math.max(0,flowerScales[i]));
-    dummy.updateMatrix();
-    flowerMesh.setMatrixAt(i,dummy.matrix);
-  }
-  flowerMesh.instanceMatrix.needsUpdate=true;
-
-  // Spores
-  const spa=sporeGeo.attributes.position.array;
-  for(let i=0;i<sporeCount;i++){
-    spa[i*3+1]+=0.008+Math.random()*0.004;
-    if(spa[i*3+1]>3.5){
-      spa[i*3]=(Math.random()-0.5)*2;
-      spa[i*3+1]=-1.5;
-      spa[i*3+2]=(Math.random()-0.5)*2;
-    }
-  }
-  sporeGeo.attributes.position.needsUpdate=true;
-
-  // Panels
-  updatePanels(scrollProgress);
-
-  renderer.render(scene,camera);
-}
-
-// GLB Loader
-const gltfLoader=new THREE.GLTFLoader();
-const progressEl=document.getElementById('horse-progress');
-const loaderEl=document.getElementById('horse-loader');
-
-gltfLoader.load('horse.glb',
-  function(gltf){
-    // Animate progress to 100%
-    progressEl.style.width='100%';
+// ── HORSE SCENE
+(function(){
+  const canvas=document.getElementById('horse-canvas');
+  if(!canvas)return;
+  const w=canvas.offsetWidth,h=canvas.offsetHeight;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(w,h);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.2;
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,w/h,0.1,100);
+  camera.position.set(0,0.5,3);
+  camera.lookAt(0,0.5,0);
+  scene.add(new THREE.AmbientLight(0xffffff,0.3));
+  const pt=new THREE.PointLight(0xC0C0C0,5);
+  pt.position.set(4,4,4);
+  scene.add(pt);
+  let horse=null;
+  const loader=new THREE.GLTFLoader();
+  loader.load('horse.glb',function(gltf){
     horse=gltf.scene;
-
-    // Center geometry
     const box=new THREE.Box3().setFromObject(horse);
     const center=box.getCenter(new THREE.Vector3());
     const size=box.getSize(new THREE.Vector3());
     horse.position.sub(center);
-
-    // Scale to ~3 units height
-    const targetH=3;
-    const scaleF=targetH/size.y;
-    horse.scale.setScalar(scaleF);
-
-    // Position at base
+    horse.scale.setScalar(3/size.y);
     horse.position.y=-1.5;
-
-    // Apply material + shadows
     horse.traverse(child=>{
       if(child.isMesh){
-        child.castShadow=true;
-        child.receiveShadow=true;
         child.material=new THREE.MeshStandardMaterial({
-          color:new THREE.Color(0x1a1a1a),
+          color:new THREE.Color(0xC0C0C0),
           metalness:0.9,
-          roughness:0.1,
-          envMapIntensity:1
+          roughness:0.1
         });
-        horseMeshes.push(child);
       }
     });
-
     scene.add(horse);
-
-    // Hide loader
-    setTimeout(()=>{
-      loaderEl.classList.add('hide');
-      setTimeout(()=>{loaderEl.style.display='none';initFinale();},800);
-    },600);
-
+    initFinale();
+  },null,function(err){
+    console.error('GLB error:',err);
+    initFinale();
+  });
+  function animate(){
     requestAnimationFrame(animate);
-  },
-  function(xhr){
-    if(xhr.lengthComputable){
-      const pct=(xhr.loaded/xhr.total*100).toFixed(0);
-      progressEl.style.width=pct+'%';
-    }
-  },
-  function(err){
-    console.error('GLB load error:',err);
-    // Fallback: hide loader anyway
-    progressEl.style.width='100%';
-    setTimeout(()=>{
-      loaderEl.classList.add('hide');
-      setTimeout(()=>{loaderEl.style.display='none';initFinale();},800);
-    },600);
-    // Start loop without horse model
-    requestAnimationFrame(animate);
+    if(horse)horse.rotation.y+=0.003;
+    renderer.render(scene,camera);
   }
-);
-
-// Resize
-window.addEventListener('resize',()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-});
+  animate();
+  window.addEventListener('resize',()=>{
+    const nw=canvas.offsetWidth,nh=canvas.offsetHeight;
+    camera.aspect=nw/nh;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nw,nh);
+  });
+})();
 </script>
 </body>
 </html>
